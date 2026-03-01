@@ -24,13 +24,13 @@ def create_tables():
         (
         {forum_id} integer primary key autoincrement unique,
         {forum_name} text not null,
-        {forum_link} text not null)
+        {forum_link} text not null unique)
         ''')
         cursor.execute(f'''
         create table if not exists {chat_table_name}
         (
         {chat_id} integer primary key autoincrement unique,
-        {chat_link} text not null
+        {chat_link} text not null unique
         )
 ''')
         db.commit()
@@ -59,7 +59,69 @@ def chats():
     try:
         cursor.execute(f'''select {chat_id}, {chat_link} from {chat_table_name}''')
         rows = cursor.fetchall()
-        return [Chat(chats_id, link) for chats_id, link in rows] or None
+        return [Chat(chats_id, link) for chats_id, link in rows] if rows else []
     except sqlite3.Error as error:
         print(f'there is an error in returning chats {error}')
+        return []
+def forums():
+    try:
+        cursor.execute(f'''select {forum_id}, {forum_name}, {forum_link} from {forum_table_name}''')
+        rows = cursor.fetchall()
+        return [Forum(forums_id, name, link) for forums_id, name, link in rows] if rows else []
+    except sqlite3.Error as error:
+        print(f'there is an error in returning forums {error}')
+        return []
+
+
+def get_forum_by_id(forum_id_value: int):
+    try:
+        cursor.execute(f'''select {forum_id}, {forum_name}, {forum_link} from {forum_table_name} where {forum_id}=?''', (forum_id_value,))
+        row = cursor.fetchone()
+        return Forum(row[0], row[1], row[2]) if row else None
+    except sqlite3.Error as error:
+        print(f'there is an error in get forum by id {error}')
         return None
+
+
+def update_forum(forum_id_value: int, name: str, link: str):
+    try:
+        cursor.execute(f'''update {forum_table_name} set {forum_name}=?, {forum_link}=? where {forum_id}=?''',
+                       (name, link, forum_id_value))
+        db.commit()
+    except sqlite3.Error as error:
+        print(f'there is an error in update forum {error}')
+
+
+def delete_forum(forum_id_value: int):
+    try:
+        cursor.execute(f'''delete from {forum_table_name} where {forum_id}=?''', (forum_id_value,))
+        db.commit()
+    except sqlite3.Error as error:
+        print(f'there is an error in delete forum {error}')
+
+
+def get_chat_by_id(chat_id_value: int):
+    try:
+        cursor.execute(f'''select {chat_id}, {chat_link} from {chat_table_name} where {chat_id}=?''', (chat_id_value,))
+        row = cursor.fetchone()
+        return Chat(row[0], row[1]) if row else None
+    except sqlite3.Error as error:
+        print(f'there is an error in get chat by id {error}')
+        return None
+
+
+def update_chat(chat_id_value: int, link: str):
+    try:
+        cursor.execute(f'''update {chat_table_name} set {chat_link}=? where {chat_id}=?''',
+                       (link, chat_id_value))
+        db.commit()
+    except sqlite3.Error as error:
+        print(f'there is an error in update chat {error}')
+
+
+def delete_chat(chat_id_value: int):
+    try:
+        cursor.execute(f'''delete from {chat_table_name} where {chat_id}=?''', (chat_id_value,))
+        db.commit()
+    except sqlite3.Error as error:
+        print(f'there is an error in delete chat {error}')
