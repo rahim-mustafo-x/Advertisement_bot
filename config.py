@@ -4,4 +4,4 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BOT_TOKEN = getenv('BOT_TOKEN')
-ADMINS = [5953769207]
+ADMINS = [5953769207,1770895225]
